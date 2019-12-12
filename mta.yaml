@@ -1,0 +1,36 @@
+ID: oAuthtest3
+_schema-version: "2.1"
+version: 0.0.1
+modules:
+  - name: oAuthtest3-db
+    type: hdb
+    path: db
+    parameters:
+      memory: 256M
+      disk-quota: 256M
+    requires:
+      - name: oAuthtest3-db-hdi-container
+  - name: oAuthtest3-srv
+    type: java
+    path: srv
+    parameters:
+      memory: 1024M
+    provides:
+      - name: srv_api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: oAuthtest3-db-hdi-container
+        properties:
+          JBP_CONFIG_RESOURCE_CONFIGURATION: '[tomcat/webapps/ROOT/META-INF/context.xml:
+            {"service_name_for_DefaultDB" : "~{hdi-container-name}"}]'
+      - name: oauth_uaa
+resources:
+  - name: oAuthtest3-db-hdi-container
+    type: com.sap.xs.hdi-container
+    properties:
+      hdi-container-name: ${service-name}
+  - name: oauth_uaa
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: oauth_uaa
